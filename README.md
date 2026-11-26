@@ -59,7 +59,7 @@ A complete pipeline for flow-based network intrusion detection:
     └── demo/                     Live demo summaries and dashboard screenshots
 ```
 
-Raw packet captures (`out/*/capture.pcap`, about 1 GB) and the CIC-IDS2017 files are **not** included. The captures can be regenerated with the scripts. CIC-IDS2017 is available from the [Canadian Institute for Cybersecurity](https://www.unb.ca/cic/datasets/ids-2017.html).
+dataset/cic.csv contains the 77,192-flow CIC-IDS2017 sample used in this project (benign, DoS Hulk, DoS slowloris, DoS Slowhttptest, PortScan and SSH-Patator flows, mapped to the five classes and to the same feature names). CIC-IDS2017(complete dataset) is available from the [Canadian Institute for Cybersecurity](https://www.unb.ca/cic/datasets/ids-2017.html).
 
 ## The dataset
 
