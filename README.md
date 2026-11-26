@@ -98,8 +98,8 @@ Raw packet captures (`out/*/capture.pcap`, about 1 GB) and the CIC-IDS2017 files
 ## 1. Setup (Kali Linux)
 
 ```bash
-git clone https://github.com/<your-username>/<repo-name>.git
-cd <repo-name>
+git clone https://github.com/Shrd7/Network_IDS_ML_workflow_TME_6015_project.git
+cd Network_IDS_ML_workflow_TME_6015_project
 bash setup.sh
 sudo mn --test pingall          # should report 0% dropped
 ```
