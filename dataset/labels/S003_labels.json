@@ -1,0 +1,139 @@
+{
+  "session_id": "S003",
+  "cls": "mixed",
+  "params": {
+    "session_id": "S003",
+    "cls": "mixed",
+    "topology": "star",
+    "split_group": "main",
+    "size": "small",
+    "bw_mbps": "10",
+    "delay": "1ms",
+    "loss_pct": "0",
+    "n_clients": "3",
+    "think_s": "2.0",
+    "duration": "600",
+    "seed": "631262"
+  },
+  "capture_iface": "s99-eth1",
+  "servers": {
+    "10.0.0.101": "00:00:00:00:01:01",
+    "10.0.0.102": "00:00:00:00:01:02"
+  },
+  "attackers": [
+    {
+      "cls": "http_flood",
+      "name": "a1",
+      "ip": "10.0.0.201",
+      "mac": "00:00:00:00:aa:01"
+    },
+    {
+      "cls": "slow_dos",
+      "name": "a2",
+      "ip": "10.0.0.202",
+      "mac": "00:00:00:00:aa:02"
+    },
+    {
+      "cls": "port_scan",
+      "name": "a3",
+      "ip": "10.0.0.203",
+      "mac": "00:00:00:00:aa:03"
+    },
+    {
+      "cls": "ssh_brute",
+      "name": "a4",
+      "ip": "10.0.0.204",
+      "mac": "00:00:00:00:aa:04"
+    }
+  ],
+  "clients": [
+    "10.0.0.1",
+    "10.0.0.2",
+    "10.0.0.3"
+  ],
+  "episodes": [
+    {
+      "cls": "port_scan",
+      "start": 1795669505.4335217,
+      "intensity": "low",
+      "target": "10.0.0.102",
+      "attacker": "10.0.0.203",
+      "cmd": "timeout 39 bash -c 'cd /tmp/ds; while true; do nmap -Pn -n -sS -T3 --top-ports 1000 --max-retries 1 10.0.0.102 >/dev/null 2>&1; sleep 5; done'",
+      "end": 1795669544.8634558
+    },
+    {
+      "cls": "http_flood",
+      "start": 1795669566.438165,
+      "intensity": "med",
+      "target": "10.0.0.102",
+      "attacker": "10.0.0.201",
+      "cmd": "timeout 32 python3 /home/kali/Downloads/mininet-ids-dataset_2/http_flood.py --target 10.0.0.102 --threads 8 --duration 27 --delay 0.05 --mode new --urls random --seed 818038",
+      "end": 1795669593.5401552
+    },
+    {
+      "cls": "ssh_brute",
+      "start": 1795669617.9169986,
+      "intensity": "med",
+      "target": "10.0.0.101",
+      "attacker": "10.0.0.204",
+      "cmd": "timeout 30 bash -c 'cd /tmp/ds; while true; do hydra -I -l labuser -P /tmp/ds/words.txt -t 8 ssh://10.0.0.101 >/dev/null 2>&1; sleep 1; done'",
+      "end": 1795669648.6179297
+    },
+    {
+      "cls": "slow_dos",
+      "start": 1795669676.7056994,
+      "intensity": "high",
+      "target": "10.0.0.102",
+      "attacker": "10.0.0.202",
+      "cmd": "timeout 37 slowhttptest -X -c 400 -r 100 -w 512 -y 1024 -n 5 -z 32 -k 3 -u http://10.0.0.102/p075.html -p 3 -l 37",
+      "end": 1795669714.5566099
+    },
+    {
+      "cls": "ssh_brute",
+      "start": 1795669735.9334602,
+      "intensity": "low",
+      "target": "10.0.0.101",
+      "attacker": "10.0.0.204",
+      "cmd": "timeout 31 bash -c 'cd /tmp/ds; while true; do hydra -I -l labuser -P /tmp/ds/words.txt -t 4 ssh://10.0.0.101 >/dev/null 2>&1; sleep 1; done'",
+      "end": 1795669767.1801145
+    },
+    {
+      "cls": "port_scan",
+      "start": 1795669795.4247737,
+      "intensity": "high",
+      "target": "10.0.0.101",
+      "attacker": "10.0.0.203",
+      "cmd": "timeout 36 bash -c 'cd /tmp/ds; while true; do nmap -Pn -n -sS -T5 --top-ports 1000 --max-retries 1 10.0.0.101 >/dev/null 2>&1; sleep 5; done'",
+      "end": 1795669831.819368
+    },
+    {
+      "cls": "http_flood",
+      "start": 1795669859.324376,
+      "intensity": "med",
+      "target": "10.0.0.101",
+      "attacker": "10.0.0.201",
+      "cmd": "timeout 43 python3 /home/kali/Downloads/mininet-ids-dataset_2/http_flood.py --target 10.0.0.101 --threads 8 --duration 38 --delay 0.05 --mode new --urls fixed --seed 215475",
+      "end": 1795669897.4560115
+    },
+    {
+      "cls": "slow_dos",
+      "start": 1795669917.910306,
+      "intensity": "med",
+      "target": "10.0.0.101",
+      "attacker": "10.0.0.202",
+      "cmd": "timeout 35 slowhttptest -H -c 200 -r 50 -i 10 -t GET -u http://10.0.0.101/p107.html -x 24 -p 3 -l 35",
+      "end": 1795669953.9103374
+    },
+    {
+      "cls": "slow_dos",
+      "start": 1795669981.587853,
+      "intensity": "high",
+      "target": "10.0.0.101",
+      "attacker": "10.0.0.202",
+      "cmd": "timeout 33 slowhttptest -H -c 400 -r 200 -i 15 -t GET -u http://10.0.0.101/p188.html -x 24 -p 3 -l 33",
+      "end": 1795670014.670223
+    }
+  ],
+  "capture_start": 1795669474.0156927,
+  "capture_end": 1795670074.0159457
+}

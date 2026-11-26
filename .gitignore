@@ -1,0 +1,18 @@
+# Raw captures (about 1 GB, regenerate with run_session.py)
+out/
+*.pcap
+*.pcap.gz
+
+# CIC-IDS2017 files (download from the CIC website)
+cic/
+dataset/cic.csv
+
+# Python and notebook clutter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# OS files
+.DS_Store

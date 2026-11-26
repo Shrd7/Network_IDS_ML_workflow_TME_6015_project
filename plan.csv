@@ -1,0 +1,5 @@
+session_id,cls,topology,split_group,size,bw_mbps,delay,loss_pct,n_clients,think_s,duration,seed
+S001,mixed,star,main,small,10,1ms,0.5,3,0.5,600,146316
+S002,mixed,linear,main,small,10,20ms,0,5,1.0,600,33326
+S003,mixed,star,main,small,10,1ms,0,3,2.0,600,631262
+S004,mixed,tree,heldout,small,10,20ms,0,5,2.0,600,735392

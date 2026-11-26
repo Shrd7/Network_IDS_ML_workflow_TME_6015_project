@@ -1,0 +1,58 @@
+{
+  "mode": "baseline",
+  "probe_success_under_attack": 0.844,
+  "probe_success_no_attack": 1.0,
+  "probe_median_latency_under_attack_ms": 22.3,
+  "episodes": [
+    {
+      "cls": "http_flood",
+      "intensity": "low",
+      "start_s": 34.9,
+      "detected": false,
+      "delay_s": null,
+      "pred": null,
+      "blocked_earlier": false
+    },
+    {
+      "cls": "ssh_brute",
+      "intensity": "med",
+      "start_s": 85.8,
+      "detected": false,
+      "delay_s": null,
+      "pred": null,
+      "blocked_earlier": false
+    },
+    {
+      "cls": "port_scan",
+      "intensity": "high",
+      "start_s": 136.7,
+      "detected": false,
+      "delay_s": null,
+      "pred": null,
+      "blocked_earlier": false
+    },
+    {
+      "cls": "slow_dos",
+      "intensity": "high",
+      "start_s": 186.6,
+      "detected": false,
+      "delay_s": null,
+      "pred": null,
+      "blocked_earlier": false
+    },
+    {
+      "cls": "http_flood",
+      "intensity": "med",
+      "start_s": 233.6,
+      "detected": false,
+      "delay_s": null,
+      "pred": null,
+      "blocked_earlier": false
+    }
+  ],
+  "episodes_detected": 0,
+  "episodes_total": 5,
+  "correct_class": 0,
+  "median_delay_s": null,
+  "false_blocks": []
+}

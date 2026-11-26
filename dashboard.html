@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>IDS live dashboard</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, Arial, sans-serif; margin: 0; padding: 18px 22px; color: #000; background: #fff; font-size: 14px; }
+  h1 { font-size: 20px; margin: 0 0 2px; }
+  .sub { color: #555; margin-bottom: 14px; }
+  .banner { border: 2px solid #000; padding: 10px 14px; font-size: 16px; font-weight: 600; margin-bottom: 14px; }
+  .banner.attack { background: #000; color: #fff; }
+  .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 14px; }
+  .tile { border: 1px solid #000; padding: 10px 12px; }
+  .tile .k { font-size: 12px; color: #444; }
+  .tile .v { font-size: 26px; font-weight: 700; margin-top: 2px; }
+  .grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; }
+  .box { border: 1px solid #000; padding: 10px 12px; margin-bottom: 14px; }
+  .box h2 { font-size: 14px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .04em; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid #ccc; }
+  th { border-bottom: 1px solid #000; }
+  .bar { height: 14px; background: #000; display: inline-block; vertical-align: middle; }
+  .muted { color: #777; }
+  .log { max-height: 220px; overflow-y: auto; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  svg text { font-size: 10px; fill: #000; }
+</style>
+</head>
+<body>
+<h1>Network intrusion detection: live dashboard</h1>
+<div class="sub" id="sub">Connecting...</div>
+<div class="banner" id="banner">-</div>
+
+<div class="tiles">
+  <div class="tile"><div class="k">Flows analysed</div><div class="v" id="flows">-</div></div>
+  <div class="tile"><div class="k">Alerts</div><div class="v" id="nalerts">-</div></div>
+  <div class="tile"><div class="k">IPs blocked now</div><div class="v" id="nblocked">-</div></div>
+  <div class="tile"><div class="k">User requests OK (last 30 s)</div><div class="v" id="succ">-</div></div>
+  <div class="tile"><div class="k">User response time (last 30 s)</div><div class="v" id="lat">-</div></div>
+</div>
+
+<div class="box">
+  <h2>Timeline: attacks (top lane), user requests OK per 5 s (grey bars), detector blocks (dashed lines)</h2>
+  <svg id="timeline" width="100%" height="180"></svg>
+</div>
+
+<div class="grid">
+  <div>
+    <div class="box">
+      <h2>Alerts</h2>
+      <table><thead><tr><th>Time</th><th>Source IP</th><th>Predicted attack</th><th>Flows</th><th>Attack share</th></tr></thead>
+      <tbody id="alerts"><tr><td colspan="5" class="muted">No alerts yet</td></tr></tbody></table>
+    </div>
+    <div class="box" id="sumbox" style="display:none">
+      <h2>Result</h2>
+      <div id="summary"></div>
+    </div>
+  </div>
+  <div>
+    <div class="box">
+      <h2>Blocked IPs</h2>
+      <table><thead><tr><th>IP</th><th>Reason</th><th>Unblocks in</th></tr></thead>
+      <tbody id="blocked"><tr><td colspan="3" class="muted">None</td></tr></tbody></table>
+    </div>
+    <div class="box">
+      <h2>Flows by predicted class</h2>
+      <table id="classes"></table>
+    </div>
+    <div class="box">
+      <h2>Attack episodes (ground truth)</h2>
+      <div class="log" id="episodes"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = s => s == null ? "-" : s.toFixed(1) + " s";
+
+function timeline(st) {
+  const svg = $("timeline"), W = svg.clientWidth || 900, H = 180, L = 40, R = 24, B = 20;
+  const laneY = 4, laneH = 20, T = laneY + laneH + 10;
+  const dur = st.duration, sx = t => L + (W - L - R) * t / dur, sy = v => T + (H - T - B) * (1 - v);
+  let s = `<text x="2" y="${laneY + 14}">attacks</text>`;
+  s += `<rect x="${L}" y="${laneY}" width="${W - L - R}" height="${laneH}" fill="none" stroke="#000"/>`;
+  for (const e of st.episodes) {
+    const end = e.end == null ? st.t : e.end, w = Math.max(2, sx(end) - sx(e.start));
+    s += `<rect x="${sx(e.start)}" y="${laneY}" width="${w}" height="${laneH}" fill="#000"/>`;
+    s += `<text x="${sx(e.start) + 3}" y="${laneY + 14}" style="fill:#fff">${e.cls}</text>`;
+  }
+  for (const v of [0, 0.5, 1]) s += `<line x1="${L}" x2="${W - R}" y1="${sy(v)}" y2="${sy(v)}" stroke="#ccc"/><text x="2" y="${sy(v) + 3}">${v * 100}%</text>`;
+  const bw = (W - L - R) * 5 / dur;
+  for (const [t, v] of st.probe.buckets) s += `<rect x="${sx(t) + 0.5}" y="${sy(v)}" width="${Math.max(1, bw - 1.5)}" height="${sy(0) - sy(v)}" fill="#aaa"/>`;
+  for (const a of st.alerts) {
+    s += `<line x1="${sx(a.t)}" x2="${sx(a.t)}" y1="${laneY}" y2="${H - B}" stroke="#000" stroke-width="2" stroke-dasharray="4,3"/>`;
+    s += `<text x="${sx(a.t) + 3}" y="${T + 10}">block</text>`;
+  }
+  for (let t = 0; t <= dur; t += 60) s += `<text x="${sx(t)}" y="${H - 5}" text-anchor="middle">${t}s</text>`;
+  s += `<line x1="${sx(st.t)}" x2="${sx(st.t)}" y1="${laneY}" y2="${H - B}" stroke="#000"/>`;
+  svg.innerHTML = s;
+}
+
+async function tick() {
+  let st;
+  try { st = await (await fetch("live.json?" + Date.now())).json(); } catch (e) { return; }
+  $("sub").textContent = `Mode: ${st.mode === "detect" ? "DETECT (model " + st.model + ")" : "BASELINE (no protection)"}  |  ` +
+    `${st.t.toFixed(0)} / ${st.duration.toFixed(0)} s` + (st.done ? "  |  finished" : "");
+  const b = $("banner");
+  if (st.attack) {
+    b.className = "banner attack";
+    b.textContent = `ATTACK RUNNING: ${st.attack.cls} (${st.attack.intensity}) from ${st.attack.attacker} -> ${st.attack.target}, for ${(st.t - st.attack.start).toFixed(0)} s`;
+  } else { b.className = "banner"; b.textContent = st.done ? "Demo finished" : "No attack running: normal traffic only"; }
+  $("flows").textContent = st.flows_total.toLocaleString();
+  $("nalerts").textContent = st.alerts.length;
+  $("nblocked").textContent = st.blocked.length;
+  $("succ").textContent = st.probe.success_30s == null ? "-" : (st.probe.success_30s * 100).toFixed(0) + "%";
+  $("lat").textContent = st.probe.latency_ms_30s == null ? "-" : st.probe.latency_ms_30s.toFixed(0) + " ms";
+
+  $("alerts").innerHTML = st.alerts.length ? st.alerts.slice().reverse().map(a =>
+    `<tr><td>${fmt(a.t)}</td><td>${a.src_ip}</td><td><b>${a.pred}</b></td><td>${a.flows}</td><td>${Math.round(a.attack_frac * 100)}%</td></tr>`).join("")
+    : `<tr><td colspan="5" class="muted">${st.mode === "detect" ? "No alerts yet" : "Detector off in baseline mode"}</td></tr>`;
+  $("blocked").innerHTML = st.blocked.length ? st.blocked.map(x =>
+    `<tr><td>${x.ip}</td><td>${x.cls}</td><td>${x.left.toFixed(0)} s</td></tr>`).join("") : `<tr><td colspan="3" class="muted">None</td></tr>`;
+  const max = Math.max(1, ...Object.values(st.pred_counts));
+  $("classes").innerHTML = Object.entries(st.pred_counts).map(([c, n]) =>
+    `<tr><td style="width:90px">${c}</td><td><span class="bar" style="width:${Math.round(160 * n / max)}px"></span> ${n.toLocaleString()}</td></tr>`).join("");
+  $("episodes").innerHTML = st.episodes.map(e =>
+    `${fmt(e.start)}  ${e.cls.padEnd(11)} ${e.intensity.padEnd(5)} ${e.attacker} -> ${e.target}${e.end == null ? "  (running)" : ""}`).join("<br>") || '<span class="muted">None yet</span>';
+  timeline(st);
+
+  if (st.summary) {
+    $("sumbox").style.display = "";
+    const s = st.summary;
+    let h = `<p>Detected <b>${s.episodes_detected}/${s.episodes_total}</b> attacks, correct type <b>${s.correct_class}</b>, ` +
+      `median time to block <b>${s.median_delay_s ?? "-"} s</b>, normal users wrongly blocked <b>${s.false_blocks.length}</b>.</p>`;
+    if (st.baseline) {
+      const r = (k, f) => `<tr><td>${k}</td><td>${f(st.baseline)}</td><td>${f(s)}</td></tr>`;
+      const pc = x => x == null ? "-" : (x * 100).toFixed(1) + "%";
+      h += `<table><tr><th>Users' experience</th><th>Without detector</th><th>With detector</th></tr>` +
+        r("Requests OK during attacks", x => pc(x.probe_success_under_attack)) +
+        r("Requests OK, no attack", x => pc(x.probe_success_no_attack)) +
+        r("Median response time during attacks", x => (x.probe_median_latency_under_attack_ms ?? "-") + " ms") + `</table>`;
+    }
+    $("summary").innerHTML = h;
+  }
+}
+setInterval(tick, 1000); tick();
+</script>
+</body>
+</html>

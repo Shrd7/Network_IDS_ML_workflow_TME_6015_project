@@ -1,0 +1,6 @@
+t,src_ip,pred,flows,attack_frac
+36.1,10.0.0.201,http_flood,23,0.96
+99.2,10.0.0.204,ssh_brute,11,1.0
+137.4,10.0.0.203,port_scan,55,1.0
+192.5,10.0.0.202,slow_dos,28,1.0
+234.7,10.0.0.201,http_flood,88,1.0
