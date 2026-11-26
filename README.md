@@ -191,4 +191,4 @@ Models trained on one network do not transfer to the other. Fine-tuning a CIC-pr
 
 ## Author
 
-[Your Name], Master of Computer Science, University of New Brunswick. Machine learning course project, 2026.
+Sharad Khurana, Master of Computer Science, University of New Brunswick. TME 6015, 2026.
