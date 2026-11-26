@@ -1,0 +1,9 @@
+model,test,benign,http_flood,port_scan,slow_dos,ssh_brute
+A_scratch,cic_test,0.649,0.0,0.034,0.522,0.0
+A_scratch,mininet_test,1.0,0.994,0.998,1.0,1.0
+B_finetuned,cic_test,0.742,0.64,0.999,0.989,0.504
+B_finetuned,mininet_test,0.974,0.778,0.998,0.985,1.0
+P_pretrained_only,cic_test,0.95,0.998,0.999,0.998,0.995
+P_pretrained_only,mininet_test,0.857,0.41,0.0,0.0,0.0
+RF,cic_test,0.567,0.001,0.217,0.349,0.458
+RF,mininet_test,1.0,1.0,0.998,1.0,1.0
